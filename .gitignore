@@ -1,0 +1,6 @@
+**/target/
+.vscode
+*.iml
+*.class
+*Test.java
+**/test/
