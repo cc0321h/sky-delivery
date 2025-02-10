@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.PageRequestDto;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -107,5 +107,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<Employee> result = page.getResult();
         return new PageResult(total, result);
     }
+    
+    /**
+     * 根据id启用和禁用员工账号
+     * @param id
+     * @param status
+     * @return
+     */
+    public void startOrStop(Integer status, Long id){
+        
+        // Employee employee = new Employee();
+        // employee.setId(id);
+        // employee.setStatus(status);
 
+        Employee employee = Employee.builder()
+                .id(id)
+                .status(status)
+                .build();
+        
+        employeeMapper.update(employee);
+    }
 }
