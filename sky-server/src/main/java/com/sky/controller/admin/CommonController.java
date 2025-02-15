@@ -1,11 +1,15 @@
 package com.sky.controller.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sky.constant.MessageConstant;
 import com.sky.result.Result;
 import com.sky.utils.MinioUtil;
 
@@ -31,6 +35,20 @@ public class CommonController {
     @ApiOperation("上传文件")
     public Result<String> upload(MultipartFile file) {
         log.info("上传文件：{}", file);
-        return Result.success(minioUtil.upload(file));
+
+        String uploadResult = new String();
+
+        try {
+            InputStream inputStream = file.getInputStream();
+            String originalFilename = file.getOriginalFilename();
+            String objectName = System.currentTimeMillis() + originalFilename.substring(originalFilename.lastIndexOf("."));
+            uploadResult = minioUtil.upload(inputStream, objectName);
+            if(uploadResult.equals(MessageConstant.UPLOAD_FAILED)) {
+                return Result.error(MessageConstant.UPLOAD_FAILED);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Result.success(uploadResult);
     }
 }

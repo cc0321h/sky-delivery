@@ -1,6 +1,11 @@
 package com.sky.utils;
 
+import java.io.InputStream;
+
 import org.springframework.web.multipart.MultipartFile;
+
+import com.sky.constant.MessageConstant;
+import com.sky.result.Result;
 
 import io.minio.BucketExistsArgs;
 import io.minio.GetPresignedObjectUrlArgs;
@@ -22,42 +27,20 @@ public class MinioUtil {
     
     /**
      * 上传文件
-     * @param file 
+     * @param inputStream 
      */
-    public String upload(MultipartFile file) {
+    public String upload(InputStream inputStream, String objectName) {
         log.info("上传文件");
 
         MinioClient minioClient = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();;
         String bucketName = new String("public");
-        String originalFilename = file.getOriginalFilename();
-        
         try {
-            minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            minioClient.putObject(PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(inputStream, inputStream.available(), -1).build());
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket(bucketName).object(objectName).build());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        try {
-            minioClient.putObject(
-                PutObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(originalFilename)
-                    .stream(file.getInputStream(), file.getSize(), -1)
-                    .build()  
-            );
-
-            return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                    .bucket(bucketName)
-                    .object(originalFilename)
-                    .method(Method.GET)
-                    .build()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return MessageConstant.UPLOAD_FAILED;
     }
     
 
