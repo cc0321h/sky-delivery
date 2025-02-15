@@ -36,19 +36,15 @@ public class CommonController {
     public Result<String> upload(MultipartFile file) {
         log.info("上传文件：{}", file);
 
-        String uploadResult = new String();
-
         try {
             InputStream inputStream = file.getInputStream();
             String originalFilename = file.getOriginalFilename();
             String objectName = System.currentTimeMillis() + originalFilename.substring(originalFilename.lastIndexOf("."));
-            uploadResult = minioUtil.upload(inputStream, objectName);
-            if(uploadResult.equals(MessageConstant.UPLOAD_FAILED)) {
-                return Result.error(MessageConstant.UPLOAD_FAILED);
-            }
+            String path = minioUtil.upload(inputStream, objectName);
+            return Result.success(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Result.success(uploadResult);
+        return Result.error(MessageConstant.UPLOAD_FAILED);
     }
 }

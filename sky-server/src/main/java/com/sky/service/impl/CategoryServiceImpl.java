@@ -18,7 +18,7 @@ import com.sky.entity.Category;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.DishMapper;
-import com.sky.mapper.setmealMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.CategoryService;
 
@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private DishMapper dishMapper;
     @Autowired
-    private setmealMapper setmealMapper;
+    private SetmealMapper setmealMapper;
     
     /**
      * 分页查询
@@ -53,9 +53,6 @@ public class CategoryServiceImpl implements CategoryService {
     public void update(CategoryDTO categorydDto) {
         Category category = new Category();
         BeanUtils.copyProperties(categorydDto, category);
-
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
         
         categoryMapper.update(category);
     }
@@ -69,8 +66,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         category.setId(id);
         category.setStatus(status);
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
         
         categoryMapper.update(category);
     }

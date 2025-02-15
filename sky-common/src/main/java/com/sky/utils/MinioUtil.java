@@ -36,11 +36,11 @@ public class MinioUtil {
         String bucketName = new String("public");
         try {
             minioClient.putObject(PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(inputStream, inputStream.available(), -1).build());
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket(bucketName).object(objectName).build());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return MessageConstant.UPLOAD_FAILED;
+        StringBuilder path = new StringBuilder().append(url).append("/").append(bucketName).append("/").append(objectName);;
+        return path.toString();
     }
     
 
