@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.CategoryMapper;
-import com.sky.mapper.dishMapper;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.setmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.CategoryService;
@@ -28,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
-    private dishMapper dishMapper;
+    private DishMapper dishMapper;
     @Autowired
     private setmealMapper setmealMapper;
     
@@ -111,4 +112,15 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryMapper.add(category);
     }
+
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    public List<Category> list(Integer type) {
+        return categoryMapper.list(type);
+    }
+
 }
