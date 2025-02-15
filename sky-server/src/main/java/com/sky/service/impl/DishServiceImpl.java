@@ -6,17 +6,21 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +33,16 @@ public class DishServiceImpl implements DishService{
 
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
+
+    @Autowired
+    private SetmealMapper setmealMapper;
+
+    public List<DishFlavor> setDishFlavorDishId(List<DishFlavor> flavors ,Long id) {
+        for(DishFlavor flavor : flavors) {
+            flavor.setDishId(id);
+        }
+        return flavors;
+    }
 
      /**
      * 分页查询菜品
@@ -58,11 +72,89 @@ public class DishServiceImpl implements DishService{
 
         List<DishFlavor> flavors = dishDTO.getFlavors();
         if(flavors != null && flavors.size() > 0) {
-            for(DishFlavor flavor : flavors) {
-                flavor.setDishId(id);
-            }
+            setDishFlavorDishId(flavors, id);
             dishFlavorMapper.insertBanch(flavors);
         }
     }
+
+    /**
+     * 批量删除菜品
+     * @param ids
+     */
+    public void deleteBanch(List<Long> ids) {
+        
+        ids.forEach(id->{
+            //根据id获取菜品
+            Dish dish = dishMapper.getById(id);
+            //判断当前菜品是否存在
+            if(dish == null) {
+                log.error("菜品不存在，id:{}", id);
+                return;
+            }
+            //判断当前菜品是否能删除--是否存在起售的菜单中
+            if (dish.getStatus().equals(StatusConstant.ENABLE)) {
+                log.error("菜品已上架，不能删除，id:{}", id);
+                return;
+            }
+            //判断当前菜品是否能删除--是否被套餐引用
+            Integer countByDishId = setmealMapper.countByDishId(id);
+            if(countByDishId > 0) {
+                log.error("菜品已被套餐引用，不能删除，id:{}", id);
+                return;
+            }
+            //删除菜品
+            dishMapper.deleteByDishId(id);
+            //删除菜品口味
+            dishFlavorMapper.deleteByDishId(id);
+        });
+    }
+
+    /**
+     * 根据id禁用和启用菜品
+     * @param status
+     * @param id
+     * @return
+     */
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        
+        dishMapper.update(dish);
+    }
+
+    /**
+     * 查询菜品详情
+     * @param id
+     * @return
+     */
+    public DishVO getByIdWithFlavor(Long id) {
+        Dish dish = dishMapper.getById(id);
+        List<DishFlavor> flavors = dishFlavorMapper.listByDishId(id);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(flavors);
+        return dishVO;
+    }
+
+    /**
+     * @param dishDTO
+     */
+    public void updateWithFlavor(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        //修改菜品表的基本信息
+        dishMapper.update(dish);
+
+        //删除菜品的口味信息
+        dishFlavorMapper.deleteByDishId(dish.getId());
+
+        //添加菜品的口味信息
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        setDishFlavorDishId(flavors, dish.getId());
+        dishFlavorMapper.insertBanch(dishDTO.getFlavors());
+    }
+
     
 }
