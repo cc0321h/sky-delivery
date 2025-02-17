@@ -15,7 +15,8 @@ public class MinioClientConfiguration {
 
     @Bean
     public MinioUtil minioUtil(@Autowired StorageProperties storageProperties) {
-        log.info("³õÊ¼»¯MinioClient");
+        log.info("åˆå§‹åŒ–MinioClient");
+        log.info(storageProperties.getUrl());
         return new MinioUtil(storageProperties.getUrl(), 
                 storageProperties.getAccessKey(), 
                 storageProperties.getSecretKey());

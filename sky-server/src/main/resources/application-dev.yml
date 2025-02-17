@@ -11,4 +11,10 @@ sky:
     access-key: LIZpG1Fy19ZIGwjcx6bX
     secret-key: anIwLIJNJ6zTphopT56wqwrAM4bHxthnlDy0shu5
     bucketname: public 
-    
+  redis:
+    host: 172.26.179.90
+    port: 6379
+    password: 123456
+  wechat:
+    appid: wx3260654894227caf
+    secret: 5b65e2669105df53b504e01b0c9edba7

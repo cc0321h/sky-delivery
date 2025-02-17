@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.DishFlavorMapper;
@@ -86,21 +88,14 @@ public class DishServiceImpl implements DishService{
         ids.forEach(id->{
             //根据id获取菜品
             Dish dish = dishMapper.getById(id);
-            //判断当前菜品是否存在
-            if(dish == null) {
-                log.error("菜品不存在，id:{}", id);
-                return;
-            }
             //判断当前菜品是否能删除--是否存在起售的菜单中
             if (dish.getStatus().equals(StatusConstant.ENABLE)) {
-                log.error("菜品已上架，不能删除，id:{}", id);
-                return;
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
             }
             //判断当前菜品是否能删除--是否被套餐引用
             Integer countByDishId = setmealMapper.countByDishId(id);
             if(countByDishId > 0) {
-                log.error("菜品已被套餐引用，不能删除，id:{}", id);
-                return;
+                throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
             }
             //删除菜品
             dishMapper.deleteByDishId(id);
@@ -154,6 +149,15 @@ public class DishServiceImpl implements DishService{
         List<DishFlavor> flavors = dishDTO.getFlavors();
         setDishFlavorDishId(flavors, dish.getId());
         dishFlavorMapper.insertBanch(dishDTO.getFlavors());
+    }
+
+    /**
+     * 查询菜品列表
+     * @param categoryId
+     * @return
+     */
+    public List<Dish> list(Long categoryId) {
+       return dishMapper.list(categoryId);
     }
 
     

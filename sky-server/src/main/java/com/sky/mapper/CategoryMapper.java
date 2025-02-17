@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import com.github.pagehelper.Page;
 import com.sky.annotation.AutoFill;
@@ -51,4 +52,12 @@ public interface CategoryMapper {
      * @return
      */
     List<Category> list(Integer type);
+
+    /**
+     * 根据id获取分类信息
+     * @param categoryId
+     * @return
+     */
+    @Select("select * from category where id = #{id}")
+    Category getById(Long categoryId);
 }
