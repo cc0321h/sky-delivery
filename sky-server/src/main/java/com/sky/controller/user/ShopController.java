@@ -15,9 +15,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController("userShopController")
 @Api(tags = "店铺相关接口")
 @RequestMapping("/user/shop")
+@RestController("userShopController")
 public class ShopController {
     
     public static final String KEY = "SHOP_STATUS";
